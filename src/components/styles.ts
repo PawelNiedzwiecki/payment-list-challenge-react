@@ -1,4 +1,13 @@
-import styled from "styled-components";
+import styled, { css, keyframes } from "styled-components";
+import type { PaymentStatus } from "../types/payment";
+
+// Keyboard-only focus ring; mouse clicks don't show it.
+const focusRing = css`
+  &:focus-visible {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
+  }
+`;
 
 export const Container = styled.div`
   width: 100%;
@@ -12,19 +21,6 @@ export const Title = styled.h2`
   font-weight: 600;
   color: #1f2937;
   margin-bottom: 1.5rem;
-`;
-
-export const FlexRow = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-
-  @media (min-width: 768px) {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-  }
 `;
 
 export const FilterRow = styled.div`
@@ -51,6 +47,12 @@ export const SearchInput = styled.input`
   &:focus {
     border-color: rgb(61, 70, 83);
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.4);
+  }
+
+  /* Native clear "x" only empties the input; Clear filters is the single reset. */
+  &::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    appearance: none;
   }
 
   @media (min-width: 768px) {
@@ -87,6 +89,8 @@ export const SearchButton = styled.button`
   &:hover {
     background-color: rgb(33, 65, 154);
   }
+
+  ${focusRing}
 `;
 
 export const ClearButton = styled.button`
@@ -99,22 +103,14 @@ export const ClearButton = styled.button`
   &:hover {
     background-color: #4b5563;
   }
+
+  ${focusRing}
 `;
 
-export const DefaultButton = styled.button`
-  padding: 0.5rem 1rem;
-  background-color: #7f8ca8;
-  color: white;
-  border-radius: 0.375rem;
-  transition: background-color 0.2s ease;
-
-  &:hover {
-    background-color: rgb(79, 85, 100);
-  }
-`;
-
-export const TableWrapper = styled.div`
+export const TableWrapper = styled.div<{ $isBusy?: boolean }>`
   overflow-x: auto;
+  opacity: ${(props) => (props.$isBusy ? 0.6 : 1)};
+  transition: opacity 0.2s ease;
   border: 1px solid #e5e7eb;
   border-radius: 0.375rem;
   background-color: white;
@@ -123,7 +119,7 @@ export const TableWrapper = styled.div`
 
 export const Table = styled.table`
   min-width: 100%;
-  text-sm: 14px;
+  font-size: 0.875rem;
   text-align: left;
 `;
 
@@ -147,18 +143,33 @@ export const TableCell = styled.td`
   color: #4b5563;
 `;
 
-export const StatusBadge = styled.span<{ status: string }>`
+const STATUS_BADGE_STYLES: Record<PaymentStatus, string> = {
+	completed: "background-color: #d1fae5; color: #15803d;",
+	pending: "background-color: #fef3c7; color: #92400e;",
+	failed: "background-color: #fee2e2; color: #b91c1c;",
+	refunded: "background-color: #fee2e2; color: #b91c1c;",
+};
+
+export const StatusBadge = styled.span<{ $status: PaymentStatus }>`
   padding: 0.25rem 0.75rem;
   border-radius: 0.375rem;
   font-size: 0.75rem;
   font-weight: 600;
 
-  ${(props) =>
-    props.status === "completed"
-      ? `background-color: #d1fae5; color: #15803d;`
-      : props.status === "pending"
-      ? `background-color: #fef3c7; color: #92400e;`
-      : `background-color: #fee2e2; color: #b91c1c;`}
+  ${(props) => STATUS_BADGE_STYLES[props.$status]}
+`;
+
+export const SpinnerWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2.5rem 0;
+`;
+
+const spin = keyframes`
+  to {
+    transform: rotate(360deg);
+  }
 `;
 
 export const Spinner = styled.div`
@@ -167,14 +178,8 @@ export const Spinner = styled.div`
   border: 4px solid #3b82f6;
   border-top-color: transparent;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
+  animation: ${spin} 1s linear infinite;
   display: inline-block;
-
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
-  }
 `;
 
 export const ErrorBox = styled.div`
@@ -193,7 +198,7 @@ export const EmptyBox = styled.div`
   border-radius: 0.375rem;
 `;
 
-export const PaginationRow = styled.div`
+export const PaginationRow = styled.nav`
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -217,6 +222,8 @@ export const PaginationButton = styled.button`
     opacity: 0.5;
     cursor: not-allowed;
   }
+
+  ${focusRing}
 `;
 
 export const TableHeaderWrapper = styled.thead`

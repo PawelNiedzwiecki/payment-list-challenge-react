@@ -19,7 +19,7 @@ export const waitForErrorMessage = async (expectedMessage: string, timeout = 100
     await waitFor(() => {
       expect(screen.getByText(expectedMessage)).toBeInTheDocument();
     }, { timeout });
-  } catch (error) {
+  } catch {
     // If the expected message isn't found, let's see what error messages are actually on the page
     const errorElements = screen.queryAllByText(/error|not found|server/i);
     const errorTexts = errorElements.map(el => el.textContent).filter(Boolean);
